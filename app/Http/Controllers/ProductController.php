@@ -61,31 +61,79 @@ class ProductController extends Controller
             }
         );
         
+        // min-rate filtering 
+        $query->when(
+            $request->has('min_rating'),
+            function ($query) use ($request) {
+                $query->where(
+                    'rating',
+                    '>=',
+                    $request->query('min_rating')
+                );
+            }
+        );
+
+        // stock filtering
+        $query->when(
+            $request->has('in_stock'),
+            function ($query) use ($request) {
+
+                if ($request->query('in_stock') == 1) {
+                    $query->where('stock', '>', 0);
+                }
+
+                if ($request->query('in_stock') == 0) {
+                    $query->where('stock', '=', 0);
+                }
+            }
+        );
+
+        // $query->when(
+        //     $request->has('sort'),
+        //     function ($query) use ($request) {
+
+        //         $sort = $request->query('sort');
+
+        //         if ($sort === 'price_asc') {
+        //             $query->orderBy('price', 'asc');
+        //         }
+
+        //         if ($sort === 'price_desc') {
+        //             $query->orderBy('price', 'desc');
+        //         }
+
+        //         if ($sort === 'name_asc') {
+        //             $query->orderBy('name', 'asc');
+        //         }
+
+        //         if ($sort === 'name_desc') {
+        //             $query->orderBy('name', 'desc');
+        //         }
+        //     }
+        // );
+
 
         $query->when(
             $request->has('sort'),
             function ($query) use ($request) {
 
+                $sortOptions = [
+                    'price_asc'  => ['price', 'asc'],
+                    'price_desc' => ['price', 'desc'],
+                    'name_asc'   => ['name', 'asc'],
+                    'name_desc'  => ['name', 'desc'],
+                ];
+
                 $sort = $request->query('sort');
 
-                if ($sort === 'price_asc') {
-                    $query->orderBy('price', 'asc');
-                }
-
-                if ($sort === 'price_desc') {
-                    $query->orderBy('price', 'desc');
-                }
-
-                if ($sort === 'name_asc') {
-                    $query->orderBy('name', 'asc');
-                }
-
-                if ($sort === 'name_desc') {
-                    $query->orderBy('name', 'desc');
+                if (isset($sortOptions[$sort])) {
+                    $query->orderBy(
+                        $sortOptions[$sort][0],
+                        $sortOptions[$sort][1]
+                    );
                 }
             }
         );
-        
         $products = $query->paginate(10);
 
         return response()->json($products);
