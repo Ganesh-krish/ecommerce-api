@@ -61,6 +61,31 @@ class ProductController extends Controller
             }
         );
         
+
+        $query->when(
+            $request->has('sort'),
+            function ($query) use ($request) {
+
+                $sort = $request->query('sort');
+
+                if ($sort === 'price_asc') {
+                    $query->orderBy('price', 'asc');
+                }
+
+                if ($sort === 'price_desc') {
+                    $query->orderBy('price', 'desc');
+                }
+
+                if ($sort === 'name_asc') {
+                    $query->orderBy('name', 'asc');
+                }
+
+                if ($sort === 'name_desc') {
+                    $query->orderBy('name', 'desc');
+                }
+            }
+        );
+        
         $products = $query->paginate(10);
 
         return response()->json($products);
