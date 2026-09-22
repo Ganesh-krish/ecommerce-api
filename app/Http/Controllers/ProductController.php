@@ -15,39 +15,51 @@ class ProductController extends Controller
         $query = Product::with('category');
 
         // Category filter
-        if ($request->has('category_id')) {
-            $query->where(
-                'category_id',
-                $request->query('category_id')
-            );
-        }
+        $query->when(
+            $request->has('category_id'),
+            function ($query) use ($request) {
+                $query->where(
+                    'category_id',
+                    $request->query('category_id')
+                );
+            }
+        );
 
         //Minimum price filter
-        if($request->has('min_price')){
-            $query->where(
-                'price',
-                '>=',
-                $request->query('min_price')
-            );
-        }
+        $query->when(
+            $request->has('min_price'),
+            function ($query) use ($request) {
+                $query->where(
+                    'price',
+                    '>=',
+                    $request->query('min_price')
+                );
+            }
+        );
 
         //Maximum price filter
-         if($request->has('max_price')){
-            $query->where(
-                'price',
-                '<=',
-                $request->query('max_price')
-            );
-        }
+        $query->when(
+            $request->has('max_price'),
+            function ($query) use ($request) {
+                $query->where(
+                    'price',
+                    '<=',
+                    $request->query('max_price')
+                );
+            }
+        );
         
         // Search by product name
-        if($request->has('search')) {
-            $query->where(
-                'name',
-                'like',
-                '%'.$request->query('search').'%'
-            );
-        }
+        $query->when(
+            $request->has('search'),
+            function ($query) use ($request) {
+                $query->where(
+                    'name',
+                    'like',
+                    '%' . $request->query('search') . '%'
+                );
+            }
+        );
         
         $products = $query->paginate(10);
 
