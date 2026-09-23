@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Http\Resources\ProductResource;
+use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
+
 
 class ProductController extends Controller
 {
@@ -114,19 +117,19 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreProductRequest  $request)
     {
-        $validated = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'rating' => 'nullable|numeric|min:0|max:5',
-            'image' => 'nullable|string|max:255',
-        ]);
+        // $validated = $request->validate([
+        //     'category_id' => 'required|exists:categories,id',
+        //     'name' => 'required|string|max:255',
+        //     'description' => 'nullable|string',
+        //     'price' => 'required|numeric|min:0',
+        //     'stock' => 'required|integer|min:0',
+        //     'rating' => 'nullable|numeric|min:0|max:5',
+        //     'image' => 'nullable|string|max:255',
+        // ]);
 
-        $product = Product::create($validated);
+        $product = Product::create($request->validated());
 
         $product->load('category');
         
@@ -146,19 +149,11 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request,Product $product)
+    public function update(UpdateProductRequest $request,Product $product)
     {
-        $validated = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'rating' => 'nullable|numeric|min:0|max:5',
-            'image' => 'nullable|string|max:255',
-        ]);
+      
 
-        $product->update($validated);
+        $product->update( $request->validated());
 
         $product->load('category');
         return new ProductResource($product);
