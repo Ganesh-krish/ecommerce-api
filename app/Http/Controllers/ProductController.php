@@ -18,8 +18,7 @@ class ProductController extends Controller
         $query->when(
             $request->has('category_id'),
             function ($query) use ($request) {
-                $query->where(
-                    'category_id',
+                $query->category(
                     $request->query('category_id')
                 );
             }
@@ -29,9 +28,7 @@ class ProductController extends Controller
         $query->when(
             $request->has('min_price'),
             function ($query) use ($request) {
-                $query->where(
-                    'price',
-                    '>=',
+                $query->minPrice(
                     $request->query('min_price')
                 );
             }
@@ -41,9 +38,7 @@ class ProductController extends Controller
         $query->when(
             $request->has('max_price'),
             function ($query) use ($request) {
-                $query->where(
-                    'price',
-                    '<=',
+                $query->maxPrice(
                     $request->query('max_price')
                 );
             }
@@ -53,10 +48,8 @@ class ProductController extends Controller
         $query->when(
             $request->has('search'),
             function ($query) use ($request) {
-                $query->where(
-                    'name',
-                    'like',
-                    '%' . $request->query('search') . '%'
+                $query->search(
+                  $request->query('search')
                 );
             }
         );
@@ -65,9 +58,7 @@ class ProductController extends Controller
         $query->when(
             $request->has('min_rating'),
             function ($query) use ($request) {
-                $query->where(
-                    'rating',
-                    '>=',
+                $query->minRating(
                     $request->query('min_rating')
                 );
             }
@@ -77,14 +68,7 @@ class ProductController extends Controller
         $query->when(
             $request->has('in_stock'),
             function ($query) use ($request) {
-
-                if ($request->query('in_stock') == 1) {
-                    $query->where('stock', '>', 0);
-                }
-
-                if ($request->query('in_stock') == 0) {
-                    $query->where('stock', '=', 0);
-                }
+                $query->inStock( $request->query('in_stock'));
             }
         );
 
@@ -116,22 +100,9 @@ class ProductController extends Controller
         $query->when(
             $request->has('sort'),
             function ($query) use ($request) {
-
-                $sortOptions = [
-                    'price_asc'  => ['price', 'asc'],
-                    'price_desc' => ['price', 'desc'],
-                    'name_asc'   => ['name', 'asc'],
-                    'name_desc'  => ['name', 'desc'],
-                ];
-
-                $sort = $request->query('sort');
-
-                if (isset($sortOptions[$sort])) {
-                    $query->orderBy(
-                        $sortOptions[$sort][0],
-                        $sortOptions[$sort][1]
-                    );
-                }
+                $query->sortBy(
+                    $request->query('sort')
+                );
             }
         );
         $products = $query->paginate(10);
