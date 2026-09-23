@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Http\Resources\ProductResource;
 
 class ProductController extends Controller
 {
@@ -107,7 +108,7 @@ class ProductController extends Controller
         );
         $products = $query->paginate(10);
 
-        return response()->json($products);
+        return ProductResource::collection($products);
     }
 
     /**
@@ -127,10 +128,9 @@ class ProductController extends Controller
 
         $product = Product::create($validated);
 
-        return response()->json(
-            $product->load('category'),
-            201
-        );
+        $product->load('category');
+        
+        return (new ProductResource($product))->response()->setStatusCode(201);
     }
 
     /**
@@ -138,7 +138,9 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        return response()->json($product->load('category'));
+        $product->load('category');
+
+        return new ProductResource($product);
     }
 
     /**
@@ -158,9 +160,9 @@ class ProductController extends Controller
 
         $product->update($validated);
 
-        return response()->json(
-            $product->load('category')
-        );
+        $product->load('category');
+        return new ProductResource($product);
+            
     }
 
     /**
