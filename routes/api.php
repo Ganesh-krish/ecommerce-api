@@ -14,12 +14,16 @@ Route::get('/user', function (Request $request) {
 Route::apiResource(
     'categories',
     CategoryController::class
-);
+)
+    ->middleware('auth:api')
+    ->middlewareFor(['store', 'update', 'destroy'], 'role:ADMIN');
 
 Route::apiResource(
     'products',
     ProductController::class
-);
+)
+->middleware('auth:api')
+->middlewareFor(['store', 'update', 'destroy'], 'role:ADMIN');
 
 
 Route::post('/auth/register', [AuthController::class, 'register']);
@@ -31,3 +35,22 @@ Route::get('/admin/test',function(){
         'message' => 'Welcome Admin'
     ]);
 })->middleware(['auth:api','role:ADMIN']);
+
+
+// Route::get('/products', [ProductController::class, 'index'])
+//     ->middleware('auth:api');
+
+// Route::get('/products/{product}', [ProductController::class, 'show'])
+//     ->middleware('auth:api');
+
+// Route::post('/products', [ProductController::class, 'store'])
+//     ->middleware(['auth:api', 'role:ADMIN']);
+
+// Route::put('/products/{product}', [ProductController::class, 'update'])
+//     ->middleware(['auth:api', 'role:ADMIN']);
+
+// Route::patch('/products/{product}', [ProductController::class, 'update'])
+//     ->middleware(['auth:api', 'role:ADMIN']);
+
+// Route::delete('/products/{product}', [ProductController::class, 'destroy'])
+//     ->middleware(['auth:api', 'role:ADMIN']);
