@@ -64,4 +64,20 @@ class AuthController extends Controller
             'user' => new UserResource($user->load('role')),
         ]);
     }
+
+    public function me()
+    {
+        $user = auth('api')->user();
+
+        return new UserResource($user->load('role'));
+    }
+
+    public function logout()
+    {
+        auth('api')->logout();
+
+        return response()->json([
+            'message' => 'Logout successful',
+        ]);
+    }
 }
