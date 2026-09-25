@@ -16,14 +16,20 @@ Route::apiResource(
     CategoryController::class
 )
     ->middleware('auth:api')
-    ->middlewareFor(['store', 'update', 'destroy'], 'role:ADMIN');
+    ->middlewareFor(['index','show'],'permission:product.view')
+    ->middlewareFor('store', 'permission:products.create')
+    ->middlewareFor('update', 'permission:products.update')
+    ->middlewareFor('destroy', 'permission:products.delete');
 
 Route::apiResource(
     'products',
     ProductController::class
 )
-->middleware('auth:api')
-->middlewareFor(['store', 'update', 'destroy'], 'role:ADMIN');
+    ->middleware('auth:api')
+    ->middlewareFor(['index', 'show'], 'permission:categories.view')
+    ->middlewareFor('store', 'permission:categories.create')
+    ->middlewareFor('update', 'permission:categories.update')
+        ->middlewareFor('destroy', 'permission:categories.delete');
 
 
 Route::post('/auth/register', [AuthController::class, 'register']);

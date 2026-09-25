@@ -7,109 +7,22 @@ use App\Models\Product;
 use App\Http\Resources\ProductResource;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
-
+use App\Services\ProductService;
 
 class ProductController extends Controller
 {
+
+    public function __construct(
+        private ProductService $productService
+    ) {
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $query = Product::with('category');
-
-        // Category filter
-        $query->when(
-            $request->has('category_id'),
-            function ($query) use ($request) {
-                $query->category(
-                    $request->query('category_id')
-                );
-            }
-        );
-
-        //Minimum price filter
-        $query->when(
-            $request->has('min_price'),
-            function ($query) use ($request) {
-                $query->minPrice(
-                    $request->query('min_price')
-                );
-            }
-        );
-
-        //Maximum price filter
-        $query->when(
-            $request->has('max_price'),
-            function ($query) use ($request) {
-                $query->maxPrice(
-                    $request->query('max_price')
-                );
-            }
-        );
-        
-        // Search by product name
-        $query->when(
-            $request->has('search'),
-            function ($query) use ($request) {
-                $query->search(
-                  $request->query('search')
-                );
-            }
-        );
-        
-        // min-rate filtering 
-        $query->when(
-            $request->has('min_rating'),
-            function ($query) use ($request) {
-                $query->minRating(
-                    $request->query('min_rating')
-                );
-            }
-        );
-
-        // stock filtering
-        $query->when(
-            $request->has('in_stock'),
-            function ($query) use ($request) {
-                $query->inStock( $request->query('in_stock'));
-            }
-        );
-
-        // $query->when(
-        //     $request->has('sort'),
-        //     function ($query) use ($request) {
-
-        //         $sort = $request->query('sort');
-
-        //         if ($sort === 'price_asc') {
-        //             $query->orderBy('price', 'asc');
-        //         }
-
-        //         if ($sort === 'price_desc') {
-        //             $query->orderBy('price', 'desc');
-        //         }
-
-        //         if ($sort === 'name_asc') {
-        //             $query->orderBy('name', 'asc');
-        //         }
-
-        //         if ($sort === 'name_desc') {
-        //             $query->orderBy('name', 'desc');
-        //         }
-        //     }
-        // );
-
-
-        $query->when(
-            $request->has('sort'),
-            function ($query) use ($request) {
-                $query->sortBy(
-                    $request->query('sort')
-                );
-            }
-        );
-        $products = $query->paginate(10);
+        $products = $this->productService->getProducts($request->query());
 
         return ProductResource::collection($products);
     }
@@ -129,7 +42,7 @@ class ProductController extends Controller
         //     'image' => 'nullable|string|max:255',
         // ]);
 
-        $product = Product::create($request->validated());
+        $product = $this->productService->create($request->validated());
 
         $product->load('category');
         
@@ -141,7 +54,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        $product->load('category');
+        $product = $this->productService->find($product);
 
         return new ProductResource($product);
     }
@@ -152,7 +65,10 @@ class ProductController extends Controller
     public function update(UpdateProductRequest $request,Product $product)
     {
 
-        $product->update( $request->validated());
+        $product = $this->productService->update(
+            $product,
+            $request->validated()
+        );
 
         $product->load('category');
         return new ProductResource($product);
@@ -164,7 +80,7 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        $product->delete();
+        $this->productService->delete($product);
 
         return response()->json([
             'message' => 'Product deleted successfully'

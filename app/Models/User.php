@@ -48,5 +48,13 @@ class User extends Authenticatable implements JWTSubject
             'roleId' => $this->role_id,
         ];
     }
+
+    public function hasPermission(string $permission): bool
+    {
+        return $this->role
+            ->permissions()
+            ->where('name', $permission)
+            ->exists();
+    }
     
 }
