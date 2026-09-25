@@ -6,6 +6,7 @@ use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Http\Requests\LoginRequest;
 use App\Services\AuthService;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
@@ -60,6 +61,26 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Logout successful',
+        ]);
+    }
+
+
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+
+    public function handleGoogleCallback()
+    {
+        $googleUser = Socialite::driver('google')->user();
+
+        $result = $this->authService->loginWithGoogle($googleUser);
+
+        return response()->json([
+            'message' => 'Google login successful',
+            'token' => $result['token'],
+            'user' => new UserResource($result['user']),
         ]);
     }
 }

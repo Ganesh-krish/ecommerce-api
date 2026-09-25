@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Socialite\Contracts\User as GoogleUser;
 
 class AuthService
 {
@@ -45,6 +46,39 @@ class AuthService
 
         if (!Hash::check($data['password'], $user->password)) {
             return null;
+        }
+
+        $token = auth('api')->login($user);
+
+        return [
+            'user' => $user->load('role'),
+            'token' => $token,
+        ];
+    }
+
+    public function loginWithGoogle(GoogleUser $googleUser)
+    {
+        $user = User::where('email', $googleUser->getEmail())->first();
+
+        if (!$user) {
+
+            $customerRole = Role::where('name', 'CUSTOMER')->firstOrFail();
+
+            $user = User::create([
+                'name' => $googleUser->getName(),
+                'email' => $googleUser->getEmail(),
+                'password' => null,
+                'google_id' => $googleUser->getId(),
+                'role_id' => $customerRole->id,
+            ]);
+        } else {
+
+            // If the existing account is a Google account,
+            // make sure the Google ID is stored.
+            if (!$user->google_id) {
+                $user->google_id = $googleUser->getId();
+                $user->save();
+            }
         }
 
         $token = auth('api')->login($user);

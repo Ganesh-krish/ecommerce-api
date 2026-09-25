@@ -31,7 +31,7 @@ Route::apiResource(
     ->middlewareFor('store', 'permission:products.create')
     ->middlewareFor('update', 'permission:products.update')
     ->middlewareFor('destroy', 'permission:products.delete');
-    
+
 
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
@@ -43,7 +43,11 @@ Route::get('/admin/test',function(){
     ]);
 })->middleware(['auth:api','role:ADMIN']);
 
+Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])
+    ->middleware('web');
 
+Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])
+    ->middleware('web');
 // Route::get('/products', [ProductController::class, 'index'])
 //     ->middleware('auth:api');
 
